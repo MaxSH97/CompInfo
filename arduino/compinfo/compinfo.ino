@@ -6,6 +6,7 @@ String inStr = "";
 boolean strComplete = false;
 
 int p = 0;
+int t = 0;
 
 LiquidCrystal lcd(11, 12, 5, 4, 3, 2);
 
@@ -49,6 +50,14 @@ String getValue(String data, char separator, int index) {
   return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
+void emptyCpuRam() {
+  lcd.setCursor(0, 0);
+  lcd.print(" \xE1\xA8 \x2D \x2D.\x2D\x25  ");
+      
+  lcd.setCursor(0, 1);
+  lcd.print("\x4F\xA4\xA9 \x2D \x2D.\x2D\x25  ");
+}
+
 void setup() {
   Serial.begin(9600);
   
@@ -66,20 +75,28 @@ void loop() {
     strComplete = true;
   }
   else if (isConn == true) {
-    isConn = false;
-    p = 0;
-    
-    Serial.setTimeout(1000);
+    if (t == 2) {
+      isConn = false;
+      p = 0;
+      t = 0;
 
-    lcd.clear();
+      Serial.setTimeout(1000);
+
+      lcd.clear();
     
-    lcd.setCursor(0, 0);
-    lcd.print("\x4F\xAC\xA5\xA0\x4B\x41\x3A");
+      lcd.setCursor(0, 0);
+      lcd.print("\x4F\xAC\xA5\xA0\x4B\x41\x3A");
     
-    lcd.setCursor(0, 1);
-    lcd.print("\x48\x65\xBF \x6F\xBF\xB3\x65\xBF\x61");
+      lcd.setCursor(0, 1);
+      lcd.print("\x48\x65\xBF \xE3\x61\xBD\xBD\xC3\x78");
     
-    delay(3000);
+      delay(3000);
+    }
+    else {
+      emptyCpuRam();
+    }
+    
+    t++;
   }
   
   if (strComplete) {
@@ -96,17 +113,14 @@ void loop() {
       delay(3000);
 
       Serial.println("REDY");
-      Serial.setTimeout(5000);
+      Serial.setTimeout(1500);
 
       lcd.clear();
-      
-      lcd.setCursor(0, 0);
-      lcd.print(" \xE1\xA8 \x2D \x2D.\x2D\x25");
-      
-      lcd.setCursor(0, 1);
-      lcd.print("\x4F\xA4\xA9 \x2D \x2D.\x2D\x25");
+      emptyCpuRam();
     }
     else if (cmd == "DATA" && isConn == true) {
+      t = 0;
+      
       float cpu = getValue(inStr, '|', 1).toFloat();
       float ram = getValue(inStr, '|', 2).toFloat();
   
