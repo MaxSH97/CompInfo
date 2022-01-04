@@ -50,12 +50,54 @@ String getValue(String data, char separator, int index) {
   return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
-void emptyCpuRam() {
-  lcd.setCursor(0, 0);
-  lcd.print(" \xE1\xA8 \x2D \x2D.\x2D\x25  ");
-      
-  lcd.setCursor(0, 1);
-  lcd.print("\x4F\xA4\xA9 \x2D \x2D.\x2D\x25  ");
+void percentCpuRam(float cpu, float ram) {
+  if (cpu == -100) {
+    lcd.setCursor(0, 0);
+    lcd.print(" \xE1\xA8 \x2D ");
+  }
+
+  lcd.setCursor(6, 0);
+  
+  if (cpu == -1 || cpu == -100) {
+    lcd.print("\x2D.\x2D\x25  ");
+  }
+  else {
+    String cpuout = String(cpu, 1);
+    
+    if (cpu < 10) {
+      lcd.print(cpuout + "\x25  ");
+    }
+    else if (cpu >= 100) {
+      lcd.print(cpuout + "\x25");
+    }
+    else {
+      lcd.print(cpuout + "\x25 ");
+    }
+  }
+
+  if (ram == -100) {
+    lcd.setCursor(0, 1);
+    lcd.print("\x4F\xA4\xA9 \x2D ");
+  }
+
+  lcd.setCursor(6, 1);
+  
+  if (ram == -1 || ram == -100) {
+    lcd.print("\x2D.\x2D\x25  ");
+  }
+  else {
+    String ramout = String(ram, 1);
+    
+    if (ram < 10) {
+      lcd.print(ramout + "\x25  ");
+    }
+    else if (ram >= 100) {
+      lcd.print(ramout + "\x25");
+    }
+    else {
+      lcd.print(ramout + "\x25 ");
+    }
+  }
 }
 
 void setup() {
@@ -93,7 +135,7 @@ void loop() {
       delay(3000);
     }
     else {
-      emptyCpuRam();
+      percentCpuRam(-1, -1);
     }
     
     t++;
@@ -116,43 +158,15 @@ void loop() {
       Serial.setTimeout(1500);
 
       lcd.clear();
-      emptyCpuRam();
+      percentCpuRam(-100, -100);
     }
     else if (cmd == "DATA" && isConn == true) {
       t = 0;
-      
-      float cpu = getValue(inStr, '|', 1).toFloat();
-      float ram = getValue(inStr, '|', 2).toFloat();
   
-      String cpuout = String(cpu, 1);
-      String ramout = String(ram, 1);
-
-      lcd.setCursor(6, 0);
-
-      if (cpu < 10) {
-        lcd.print(cpuout + "\x25  ");
-      }
-      else if (cpu >= 100) {
-        lcd.print(cpuout + "\x25");
-      }
-      else {
-        lcd.print(cpuout + "\x25 ");
-      }
-    
-      lcd.setCursor(6, 1);
-    
-      if (ram < 10) {
-        lcd.print(ramout + "\x25  ");
-      }
-      else if (ram >= 100) {
-        lcd.print(ramout + "\x25");
-      }
-      else {
-        lcd.print(ramout + "\x25 ");
-      }
+      percentCpuRam(getValue(inStr, '|', 1).toFloat(), getValue(inStr, '|', 2).toFloat());
     }
   
-  inStr = "";
+    inStr = "";
     strComplete = false;
   }
 }
