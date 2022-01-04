@@ -110,6 +110,9 @@ void loop() {
   if (isConn == false) {
     p = connHello(p);
   }
+  else {
+    p = 0;
+  }
 
   inStr = Serial.readStringUntil('\n');
 
@@ -119,7 +122,6 @@ void loop() {
   else if (isConn == true) {
     if (t == 2) {
       isConn = false;
-      p = 0;
       t = 0;
 
       Serial.setTimeout(1000);
@@ -164,6 +166,18 @@ void loop() {
       t = 0;
   
       percentCpuRam(getValue(inStr, '|', 1).toFloat(), getValue(inStr, '|', 2).toFloat());
+    }
+    else if (cmd == "BYEL" && isConn == true) {
+      isConn = false;
+
+      Serial.setTimeout(1000);
+      
+      lcd.clear();
+
+      lcd.setCursor(0, 0);
+      lcd.print("\xA4\x61\xB3\x65\x70\xC1\x65\xBD\x6F");
+
+      delay(3000);
     }
   
     inStr = "";

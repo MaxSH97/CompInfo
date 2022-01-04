@@ -9,14 +9,14 @@ import serial.tools.list_ports
 
 def conn_arduino():
     arduino_port = None
+    ports = serial.tools.list_ports.comports()
 
-    try:
-        ports = serial.tools.list_ports.comports()
+    for port in sorted(ports):
+        active_port = serial.Serial(port.device, timeout=1)
 
-        for port in sorted(ports):
-            active_port = serial.Serial(port.device, timeout=1)
+        print('Connecting to ' + active_port.name + '...')
 
-            print('Connecting to ' + active_port.name + '...')
+        try:
             sleep(2)
 
             active_port.write(b'HLEO\n')
@@ -26,12 +26,17 @@ def conn_arduino():
                 print('\"Arduino\" found!')
                 arduino_port = active_port
                 break
+        except Exception as e:
+            print('Connection to \"Arduino\" failed:')
+            print(e)
+            sys.exit(1)
+        except KeyboardInterrupt:
+            active_port.write(b'BYEL\n')
+            active_port.close()
+            print('\nBye!')
+            sys.exit(0)
 
-        return arduino_port
-    except Exception as e:
-        print('Connection to \"Arduino\" failed:')
-        print(e)
-        sys.exit(1)
+    return arduino_port
 
 
 def send_data(active_port):
@@ -56,6 +61,11 @@ def send_data(active_port):
         print('Sending data to \"Arduino\" failed:')
         print(e)
         sys.exit(1)
+    except KeyboardInterrupt:
+        active_port.write(b'BYEL\n')
+        active_port.close()
+        print('\nBye!')
+        sys.exit(0)
 
 
 if __name__ == '__main__':
