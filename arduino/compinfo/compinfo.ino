@@ -5,8 +5,11 @@ boolean isConn = false;
 String inStr = "";
 boolean strComplete = false;
 
+int page = 1;
+
 int p = 0;
 int t = 0;
+int s = 0;
 
 LiquidCrystal lcd(11, 12, 5, 4, 3, 2);
 
@@ -50,53 +53,93 @@ String getValue(String data, char separator, int index) {
   return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
-void percentCpuRam(float cpu, float ram) {
-  if (cpu == -100) {
-    lcd.setCursor(0, 0);
-    lcd.print(" \xE1\xA8 \x2D ");
+String byteConvertStr(float bytes) {
+  int i = 0;
+  
+  for (i; i < 4; i++) {
+    if (bytes < 1000) {
+      break;
+    }
+    
+    bytes = bytes / 1024;
   }
+
+  String value = String(bytes, 2);
+
+  if (i == 0) {
+    return String(bytes, 0) + " \xA0       ";
+  }
+  else if (i == 1) {
+    return value + " \x4B\xB2   ";
+  }
+  else if (i == 2) {
+    return value + " \x4D\xB2   ";
+  }
+  else if (i == 3) {
+    return value + " \xA1\xB2   ";
+  }
+  else {
+    return value + " \x54\xB2   ";
+  }
+}
+
+void percentCpuRam(float cpu, float ram) {
+  lcd.setCursor(0, 0);
+  lcd.print(" \xE1\xA8 \x2D ");
 
   lcd.setCursor(6, 0);
   
-  if (cpu == -1 || cpu == -100) {
-    lcd.print("\x2D.\x2D\x25  ");
+  if (cpu == -1) {
+    lcd.print("\x2D.\x2D\x25      ");
   }
   else {
     String cpuout = String(cpu, 1);
     
-    if (cpu < 10) {
-      lcd.print(cpuout + "\x25  ");
-    }
-    else if (cpu >= 100) {
-      lcd.print(cpuout + "\x25");
-    }
-    else {
-      lcd.print(cpuout + "\x25 ");
-    }
+    lcd.print(cpuout + "\x25      ");
   }
 
-  if (ram == -100) {
-    lcd.setCursor(0, 1);
-    lcd.print("\x4F\xA4\xA9 \x2D ");
-  }
+  lcd.setCursor(0, 1);
+  lcd.print("\x4F\xA4\xA9 \x2D ");
 
   lcd.setCursor(6, 1);
   
-  if (ram == -1 || ram == -100) {
-    lcd.print("\x2D.\x2D\x25  ");
+  if (ram == -1) {
+    lcd.print("\x2D.\x2D\x25      ");
   }
   else {
     String ramout = String(ram, 1);
     
-    if (ram < 10) {
-      lcd.print(ramout + "\x25  ");
-    }
-    else if (ram >= 100) {
-      lcd.print(ramout + "\x25");
-    }
-    else {
-      lcd.print(ramout + "\x25 ");
-    }
+    lcd.print(ramout + "\x25      ");
+  }
+}
+
+void valueRam(float ramcur, float ramttl) {
+  lcd.setCursor(0, 0);
+  lcd.print("\x4F\xA4\xA9 \x2D ");
+
+  lcd.setCursor(6, 0);
+  
+  if (ramcur == -1) {
+    lcd.print("\x2D \xA0       ");
+  }
+  else {
+    String ramcurout = byteConvertStr(ramcur);
+
+    lcd.print(ramcurout);
+  }
+
+  lcd.setCursor(0, 1);
+  lcd.print("   \xB8\xB7 ");
+
+  lcd.setCursor(6, 1);
+  
+  if (ramttl == -1) {
+    lcd.print("\x2D \xA0       ");
+  }
+  else {
+    String ramttlout = byteConvertStr(ramttl);
+
+    lcd.print(ramttlout);
   }
 }
 
@@ -122,7 +165,11 @@ void loop() {
   else if (isConn == true) {
     if (t == 2) {
       isConn = false;
+      
+      page = 1;
+      
       t = 0;
+      s = 0;
 
       Serial.setTimeout(1000);
 
@@ -137,7 +184,28 @@ void loop() {
       delay(3000);
     }
     else {
-      percentCpuRam(-1, -1);
+      switch (page) {
+        case 1:
+          percentCpuRam(-1, -1);
+          break;
+        case 2:
+          valueRam(-1, -1);
+          break;
+      }
+
+      if (s == 9) {
+        if (page != 2) {
+          page++;
+        }
+        else {
+          page = 1;
+        }
+
+        s = 0;
+      }
+      else {
+        s++;  
+      }
     }
     
     t++;
@@ -160,12 +228,33 @@ void loop() {
       Serial.setTimeout(1500);
 
       lcd.clear();
-      percentCpuRam(-100, -100);
+      percentCpuRam(-1, -1);
     }
     else if (cmd == "DATA" && isConn == true) {
       t = 0;
-  
-      percentCpuRam(getValue(inStr, '|', 1).toFloat(), getValue(inStr, '|', 2).toFloat());
+
+      switch (page) {
+        case 1:
+          percentCpuRam(getValue(inStr, '|', 1).toFloat(), getValue(inStr, '|', 2).toFloat());
+          break;
+        case 2:
+          valueRam(getValue(inStr, '|', 3).toFloat(), getValue(inStr, '|', 4).toFloat());
+          break;
+      }
+
+      if (s == 9) {
+        if (page != 2) {
+          page++;
+        }
+        else {
+          page = 1;
+        }
+
+        s = 0;
+      }
+      else {
+        s++;  
+      }
     }
     else if (cmd == "BYEL" && isConn == true) {
       isConn = false;

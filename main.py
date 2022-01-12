@@ -49,10 +49,13 @@ def send_data(active_port):
             print('\"Arduino\" ready! Start sending data')
 
             while True:
-                cpu = psutil.cpu_percent()
-                ram = psutil.virtual_memory().percent
+                cpu_perc = psutil.cpu_percent()
+                ram_perc = psutil.virtual_memory().percent
+                ram_used = psutil.virtual_memory().used
+                ram_ttl = psutil.virtual_memory().total
 
-                active_port.write(('DATA|' + str(cpu) + '|' + str(ram) + '\n').encode())
+                active_port.write(('DATA|' + str(cpu_perc) + '|' + str(ram_perc) + '|' + str(ram_used) + '|'
+                                   + str(ram_ttl) + '\n').encode())
 
                 sleep(1)
         else:
