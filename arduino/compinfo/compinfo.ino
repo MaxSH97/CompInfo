@@ -162,6 +162,36 @@ void percentSwap(float swap) {
   lcd.print("                ");
 }
 
+void valueSwap(float swapcur, float swapttl) {
+  lcd.setCursor(0, 0);
+  lcd.print("\xAA\xA8 \x2D ");
+
+  lcd.setCursor(5, 0);
+  
+  if (swapcur == -1) {
+    lcd.print("\x2D \xA0        ");
+  }
+  else {
+    String swapcurout = byteConvertStr(swapcur);
+
+    lcd.print(swapcurout);
+  }
+
+  lcd.setCursor(0, 1);
+  lcd.print("  \xB8\xB7 ");
+
+  lcd.setCursor(5, 1);
+  
+  if (swapttl == -1) {
+    lcd.print("\x2D \xA0        ");
+  }
+  else {
+    String swapttlout = byteConvertStr(swapttl);
+
+    lcd.print(swapttlout);
+  }
+}
+
 void setup() {
   Serial.begin(9600);
   
@@ -213,10 +243,13 @@ void loop() {
         case 3:
           percentSwap(-1);
           break;
+        case 4:
+          valueSwap(-1, -1);
+          break;
       }
 
       if (s == 9) {
-        if (page != 3) {
+        if (page != 4) {
           page++;
         }
         else {
@@ -265,10 +298,13 @@ void loop() {
         case 3:
           percentSwap(getValue(inStr, '|', 5).toFloat());
           break;
+        case 4:
+          valueSwap(getValue(inStr, '|', 6).toFloat(), getValue(inStr, '|', 7).toFloat());
+          break;
       }
 
       if (s == 9) {
-        if (page != 3) {
+        if (page != 4) {
           page++;
         }
         else {
