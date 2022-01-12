@@ -143,6 +143,25 @@ void valueRam(float ramcur, float ramttl) {
   }
 }
 
+void percentSwap(float swap) {
+  lcd.setCursor(0, 0);
+  lcd.print("\xAA\xA8 \x2D ");
+
+  lcd.setCursor(5, 0);
+  
+  if (swap == -1) {
+    lcd.print("\x2D.\x2D\x25       ");
+  }
+  else {
+    String swapout = String(swap, 1);
+    
+    lcd.print(swapout + "\x25       ");
+  }
+
+  lcd.setCursor(0, 1);
+  lcd.print("                ");
+}
+
 void setup() {
   Serial.begin(9600);
   
@@ -191,10 +210,13 @@ void loop() {
         case 2:
           valueRam(-1, -1);
           break;
+        case 3:
+          percentSwap(-1);
+          break;
       }
 
       if (s == 9) {
-        if (page != 2) {
+        if (page != 3) {
           page++;
         }
         else {
@@ -240,10 +262,13 @@ void loop() {
         case 2:
           valueRam(getValue(inStr, '|', 3).toFloat(), getValue(inStr, '|', 4).toFloat());
           break;
+        case 3:
+          percentSwap(getValue(inStr, '|', 5).toFloat());
+          break;
       }
 
       if (s == 9) {
-        if (page != 2) {
+        if (page != 3) {
           page++;
         }
         else {
