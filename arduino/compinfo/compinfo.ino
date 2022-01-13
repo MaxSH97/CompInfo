@@ -192,6 +192,56 @@ void valueSwap(float swapcur, float swapttl) {
   }
 }
 
+void percentCpuAvg(float cpuavg1, float cpuavg5, float cpuavg15) {
+  if (page == 5) {
+    lcd.setCursor(0, 0);
+    lcd.print("\xE1\xA8\x43\x70\x31 \x2D ");
+  
+    lcd.setCursor(8, 0);
+    
+    if (cpuavg1 == -1) {
+      lcd.print("\x2D.\x2D\x25  ");
+    }
+    else {
+      String cpuavg1out = String(cpuavg1, 1);
+      
+      lcd.print(cpuavg1out + "\x25  ");
+    }
+  
+    lcd.setCursor(0, 1);
+    lcd.print("\xE1\xA8\x43\x70\x35 \x2D ");
+  
+    lcd.setCursor(8, 1);
+    
+    if (cpuavg5 == -1) {
+      lcd.print("\x2D.\x2D\x25  ");
+    }
+    else {
+      String cpuavg5out = String(cpuavg5, 1);
+      
+      lcd.print(cpuavg5out + "\x25  ");
+    }
+  }
+  else if (page == 6) {
+    lcd.setCursor(0, 0);
+    lcd.print("\xE1\xA8\x43\x70\x31\x35 \x2D ");
+  
+    lcd.setCursor(9, 0);
+    
+    if (cpuavg15 == -1) {
+      lcd.print("\x2D.\x2D\x25 ");
+    }
+    else {
+      String cpuavg15out = String(cpuavg15, 1);
+      
+      lcd.print(cpuavg15out + "\x25 ");
+    }
+
+    lcd.setCursor(0, 1);
+    lcd.print("                ");
+  }
+}
+
 void setup() {
   Serial.begin(9600);
   
@@ -246,10 +296,14 @@ void loop() {
         case 4:
           valueSwap(-1, -1);
           break;
+        case 5:
+        case 6:
+          percentCpuAvg(-1, -1, -1);
+          break;
       }
 
       if (s == 9) {
-        if (page != 4) {
+        if (page != 6) {
           page++;
         }
         else {
@@ -301,10 +355,14 @@ void loop() {
         case 4:
           valueSwap(getValue(inStr, '|', 6).toFloat(), getValue(inStr, '|', 7).toFloat());
           break;
+        case 5:
+        case 6:
+          percentCpuAvg(getValue(inStr, '|', 8).toFloat(), getValue(inStr, '|', 9).toFloat(), getValue(inStr, '|', 10).toFloat());
+          break;
       }
 
       if (s == 9) {
-        if (page != 4) {
+        if (page != 6) {
           page++;
         }
         else {

@@ -50,6 +50,7 @@ def send_data(active_port):
 
             while True:
                 cpu_perc = psutil.cpu_percent()
+                cpu_load_avg_prec = [x / psutil.cpu_count() * 100 for x in psutil.getloadavg()]
 
                 ram_perc = psutil.virtual_memory().percent
                 ram_used = psutil.virtual_memory().used
@@ -61,7 +62,9 @@ def send_data(active_port):
 
                 active_port.write(('DATA|' + str(cpu_perc) + '|' + str(ram_perc) + '|' + str(ram_used) + '|'
                                    + str(ram_ttl) + '|' + str(swap_perc) + '|' + str(swap_used) + '|' + str(swap_ttl)
-                                   + '\n').encode())
+                                   + '|' + "{:.1f}".format(cpu_load_avg_prec[0]) + '|'
+                                   + "{:.1f}".format(cpu_load_avg_prec[1]) + '|'
+                                   + "{:.1f}".format(cpu_load_avg_prec[2]) + '\n').encode())
 
                 sleep(1)
         else:
